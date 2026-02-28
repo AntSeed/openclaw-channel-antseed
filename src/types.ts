@@ -1,16 +1,26 @@
+export type PricingMode = "per-token" | "per-minute" | "per-task"
+
 export interface AntseedChannelConfig {
   enabled?: boolean
   models: string[]
   displayName?: string
   pricing?: {
+    mode?: PricingMode
     inputUsdPerMillion?: number
     outputUsdPerMillion?: number
+    usdPerMinute?: number
+    usdPerTask?: number
   }
   maxConcurrency?: number
   bootstrapNodes?: string[]
   dhtPort?: number
   signalingPort?: number
   dataDir?: string
+  allowedBuyers?: string[]
+  requestLog?: {
+    enabled: boolean
+    path?: string
+  }
 }
 
 export interface ResolvedAccount {

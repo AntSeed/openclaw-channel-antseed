@@ -47,6 +47,7 @@ Add to your `~/.openclaw/openclaw.json`:
       "models": ["openclaw/jeff"],
       "displayName": "OpenClaw Jeff",
       "pricing": {
+        "mode": "per-token",
         "inputUsdPerMillion": 5,
         "outputUsdPerMillion": 15
       },
@@ -73,13 +74,91 @@ openclaw restart
 | `enabled` | boolean | `true` | Enable/disable the channel |
 | `models` | string[] | *required* | Model routing keys to advertise on the network (e.g., `openclaw/jeff`) |
 | `displayName` | string | `"OpenClaw Agent"` | Display name shown to peers |
-| `pricing.inputUsdPerMillion` | number | `0` | Input token pricing in USD per 1M tokens |
-| `pricing.outputUsdPerMillion` | number | `0` | Output token pricing in USD per 1M tokens |
+| `pricing.mode` | string | `"per-token"` | Pricing mode: `per-token`, `per-minute`, or `per-task` |
+| `pricing.inputUsdPerMillion` | number | `0` | Input token pricing in USD per 1M tokens (per-token mode) |
+| `pricing.outputUsdPerMillion` | number | `0` | Output token pricing in USD per 1M tokens (per-token mode) |
+| `pricing.usdPerMinute` | number | — | Price per minute of execution (per-minute mode) |
+| `pricing.usdPerTask` | number | — | Price per task/request (per-task mode) |
 | `maxConcurrency` | number | `4` | Maximum concurrent requests |
+| `allowedBuyers` | string[] | `[]` | Peer ID allowlist (empty = allow all) |
+| `requestLog.enabled` | boolean | `false` | Enable request logging |
+| `requestLog.path` | string | `<dataDir>/requests.jsonl` | Path for the request log file |
 | `bootstrapNodes` | string[] | AntSeed defaults | DHT bootstrap nodes (`host:port`) |
 | `dhtPort` | number | `6881` | UDP port for DHT |
 | `signalingPort` | number | `6882` | TCP port for P2P signaling |
 | `dataDir` | string | — | Data directory for P2P identity and state |
+
+### Pricing modes
+
+**Per-token** (default) — charge based on input/output token counts:
+
+```json
+"pricing": {
+  "mode": "per-token",
+  "inputUsdPerMillion": 5,
+  "outputUsdPerMillion": 15
+}
+```
+
+**Per-minute** — charge based on execution duration:
+
+```json
+"pricing": {
+  "mode": "per-minute",
+  "usdPerMinute": 0.50
+}
+```
+
+**Per-task** — flat rate per request:
+
+```json
+"pricing": {
+  "mode": "per-task",
+  "usdPerTask": 2.00
+}
+```
+
+> Per-minute and per-task modes track execution duration and are ready for integration with the AntSeed payment layer when it adds support for these billing modes.
+
+### Buyer allowlist
+
+Restrict which peers can send requests to your agent:
+
+```json
+"allowedBuyers": [
+  "f1cf38cf5318df7a97e296f4415bf4bb53eda96a8f4c5bae0b0de8086044439a"
+]
+```
+
+When the allowlist is empty (default), all peers are accepted. Blocked peers receive a `403` response.
+
+> Requires the `x-antseed-buyer-peer-id` header, which is injected by `@antseed/node` >= 0.1.7.
+
+### Request logging
+
+Log all incoming requests for auditing:
+
+```json
+"requestLog": {
+  "enabled": true,
+  "path": "/var/log/openclaw-antseed.jsonl"
+}
+```
+
+Each request appends a JSON line:
+
+```json
+{
+  "timestamp": "2026-02-28T10:00:00.000Z",
+  "requestId": "req-123",
+  "buyerPeerId": "f1cf38cf...",
+  "model": "openclaw/jeff",
+  "messagePreview": "qa my website at...",
+  "statusCode": 200,
+  "durationMs": 4500,
+  "responseLength": 1234
+}
+```
 
 ## How buyers connect
 

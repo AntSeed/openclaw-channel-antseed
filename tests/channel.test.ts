@@ -101,6 +101,63 @@ describe("antseedChannel", () => {
         }),
       ).toBe(false)
     })
+
+    it("should resolve account with allowedBuyers config", () => {
+      const cfg = {
+        channels: {
+          antseed: {
+            models: ["openclaw/jeff"],
+            allowedBuyers: ["peer-abc", "peer-def"],
+          },
+        },
+      }
+      const account = antseedChannel.config.resolveAccount(cfg)
+      expect(account.config.allowedBuyers).toEqual(["peer-abc", "peer-def"])
+    })
+
+    it("should resolve account with requestLog config", () => {
+      const cfg = {
+        channels: {
+          antseed: {
+            models: ["openclaw/jeff"],
+            requestLog: { enabled: true, path: "/var/log/antseed.jsonl" },
+          },
+        },
+      }
+      const account = antseedChannel.config.resolveAccount(cfg)
+      expect(account.config.requestLog).toEqual({
+        enabled: true,
+        path: "/var/log/antseed.jsonl",
+      })
+    })
+
+    it("should resolve account with per-minute pricing config", () => {
+      const cfg = {
+        channels: {
+          antseed: {
+            models: ["openclaw/jeff"],
+            pricing: { mode: "per-minute", usdPerMinute: 0.50 },
+          },
+        },
+      }
+      const account = antseedChannel.config.resolveAccount(cfg)
+      expect(account.config.pricing?.mode).toBe("per-minute")
+      expect(account.config.pricing?.usdPerMinute).toBe(0.50)
+    })
+
+    it("should resolve account with per-task pricing config", () => {
+      const cfg = {
+        channels: {
+          antseed: {
+            models: ["openclaw/jeff"],
+            pricing: { mode: "per-task", usdPerTask: 2.00 },
+          },
+        },
+      }
+      const account = antseedChannel.config.resolveAccount(cfg)
+      expect(account.config.pricing?.mode).toBe("per-task")
+      expect(account.config.pricing?.usdPerTask).toBe(2.00)
+    })
   })
 
   describe("outbound", () => {
