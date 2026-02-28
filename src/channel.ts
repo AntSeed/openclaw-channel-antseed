@@ -1,3 +1,4 @@
+import { join } from "node:path"
 import { AntseedNode } from "@antseed/node"
 import { parseBootstrapList, toBootstrapConfig } from "@antseed/node/discovery"
 import { OpenClawProvider } from "./provider.js"
@@ -86,27 +87,46 @@ export const antseedChannel = {
         throw new Error("AntSeed channel requires at least one model (e.g., openclaw/jeff)")
       }
 
+      const pricingMode = config.pricing?.mode ?? "per-token"
+
       ctx.log?.info?.(`[AntSeed] Initializing P2P provider...`)
       ctx.log?.info?.(`[AntSeed] Models: ${config.models.join(", ")}`)
+      ctx.log?.info?.(`[AntSeed] Pricing mode: ${pricingMode}`)
 
       // Dynamically import the runtime — set by index.ts at registration time
       const { getRuntime } = await import("../index.js")
       const rt = getRuntime()
 
+      // Resolve request log path
+      const requestLogConfig = config.requestLog?.enabled
+        ? {
+            enabled: true as const,
+            path: config.requestLog.path ?? join(config.dataDir ?? ".", "requests.jsonl"),
+          }
+        : undefined
+
+      // Build token pricing (only used for per-token mode)
+      const tokenPricing = {
+        defaults: {
+          inputUsdPerMillion:
+            pricingMode === "per-token" ? (config.pricing?.inputUsdPerMillion ?? 0) : 0,
+          outputUsdPerMillion:
+            pricingMode === "per-token" ? (config.pricing?.outputUsdPerMillion ?? 0) : 0,
+        },
+      }
+
       // Build the Provider that bridges P2P requests → OpenClaw agent
       const provider = new OpenClawProvider({
         models: config.models,
-        pricing: {
-          defaults: {
-            inputUsdPerMillion: config.pricing?.inputUsdPerMillion ?? 0,
-            outputUsdPerMillion: config.pricing?.outputUsdPerMillion ?? 0,
-          },
-        },
+        pricing: tokenPricing,
+        pricingMode,
         maxConcurrency: config.maxConcurrency ?? 4,
         runtime: rt,
         cfg,
         accountId: account.accountId,
         log: ctx.log,
+        allowedBuyers: config.allowedBuyers,
+        requestLog: requestLogConfig,
       })
 
       // Build bootstrap node list
