@@ -1,0 +1,8 @@
+{
+  "id": "antseed",
+  "label": "AntSeed",
+  "selectionLabel": "AntSeed P2P Network",
+  "blurb": "Provide AI agent services on the AntSeed peer-to-peer network",
+  "order": 80,
+  "aliases": ["p2p"]
+}

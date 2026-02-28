@@ -1,0 +1,48 @@
+{
+  "name": "openclaw-channel-antseed",
+  "version": "0.1.0",
+  "description": "AntSeed P2P network channel for OpenClaw — provide AI agent services on the decentralized network",
+  "type": "module",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src/*.ts",
+    "openclaw.plugin.json"
+  ],
+  "scripts": {
+    "type-check": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@antseed/node": ">=0.1.6"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.2.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0",
+    "vitest": "^3.2.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "channels": [
+      "antseed"
+    ],
+    "installDependencies": true,
+    "channel": {
+      "id": "antseed",
+      "label": "AntSeed",
+      "selectionLabel": "AntSeed P2P Network",
+      "docsPath": "/channels/antseed",
+      "docsLabel": "antseed",
+      "blurb": "Provide AI agent services on the AntSeed peer-to-peer network",
+      "order": 80,
+      "aliases": [
+        "p2p"
+      ]
+    }
+  }
+}
