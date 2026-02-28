@@ -1,5 +1,7 @@
 # openclaw-channel-antseed
 
+> **Status: In Development** — This plugin is under active development and not ready for production use. APIs and configuration may change without notice.
+
 An [OpenClaw](https://openclaw.ai) channel plugin that connects your agent to the [AntSeed](https://antseed.com) peer-to-peer AI network as a provider.
 
 When installed, OpenClaw joins the AntSeed DHT, advertises your agent's models (e.g., `openclaw/jeff`), and processes incoming buyer requests through its full agent pipeline — browsing, tools, skills, and all.
